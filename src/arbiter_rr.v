@@ -1,4 +1,4 @@
-module tt_um_arbiter_rr (
+module arbiter_rr (
     input  wire       clk,
     input  wire       rst,
     input  wire [3:0] req,
@@ -93,5 +93,33 @@ always @(posedge clk or posedge rst) begin
     else if (state == WAIT_RELEASE)
         grant_timer <= grant_timer + 1'b1;
 end
+
+endmodule
+module tt_um_arbiter_rr (
+    input  wire [7:0] ui_in,
+    output wire [7:0] uo_out,
+    input  wire [7:0] uio_in,
+    output wire [7:0] uio_out,
+    output wire [7:0] uio_oe,
+    input  wire        ena,
+    input  wire        clk,
+    input  wire        rst_n
+);
+
+    wire [3:0] req_internal   = ui_in[3:0];
+    wire [3:0] grant_internal;
+
+    arbiter_rr dut (
+        .clk(clk),
+        .rst(~rst_n),
+        .req(req_internal),
+        .grant(grant_internal)
+    );
+
+    assign uo_out  = {4'b0000, grant_internal};
+    assign uio_out = 8'b0;
+    assign uio_oe  = 8'b0;
+
+    wire _unused = &{ena, uio_in, 1'b0};
 
 endmodule
